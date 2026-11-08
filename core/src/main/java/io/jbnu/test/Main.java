@@ -25,6 +25,7 @@ public class Main extends ApplicationAdapter {
 
     private SpriteBatch batch;
     private Texture playerTexture, blockTexture, flagTexture,backgroundTexture, energyBallTexture;
+    private Texture enemy1Texture;
     private OrthographicCamera camera;
     private FitViewport viewport;
 
@@ -41,11 +42,15 @@ public class Main extends ApplicationAdapter {
     private static final float BG_SPEED = 0.3f;
 
 
-
+    private int playerHP = 3;
 
     private final Vector3 mouse = new Vector3(); // 마우스 클릭시
     private final Vector2 forceDir = new Vector2(); // 힘의 방향
     private int remainDash = 0; // 남은 대쉬 횟수
+
+
+
+    private final Array<Enemy> enemies = new Array<>();
 
 
     @Override
@@ -56,6 +61,7 @@ public class Main extends ApplicationAdapter {
         flagTexture = new Texture(Gdx.files.internal("flag.png"));
         backgroundTexture = new Texture(Gdx.files.internal("Background1.jpg"));
         energyBallTexture = new Texture(Gdx.files.internal("DashEnergyBall.png"));
+        enemy1Texture = new Texture(Gdx.files.internal("Enemy1.png"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
@@ -74,6 +80,8 @@ public class Main extends ApplicationAdapter {
         blocks.add(new Rectangle(1930, 60, 120, 210));
         blocks.add(new Rectangle(2100, 270, 110, 24));
         blocks.add(new Rectangle(2280, 320, 210, 24));
+
+        enemies.add(new Enemy(500, 60, 32, 32, 3));
     }
 
 
@@ -106,6 +114,11 @@ public class Main extends ApplicationAdapter {
             player.x, player.y, player.width, player.height,
             0, 0, playerTexture.getWidth(), playerTexture.getHeight(),
             !facingLeft, false);
+
+        // 적들
+        for (Enemy e : enemies) {
+            batch.draw(enemy1Texture, e.col.x, e.col.y, e.col.width, e.col.height);
+        }
 
         // 마우스 주변 에너지볼
         if (remainDash >= 1){
@@ -177,6 +190,39 @@ public class Main extends ApplicationAdapter {
         // 3. X축과 Y축을 나누어 이동하고 충돌을 보정합니다.
         moveX(dt);
         moveY(dt);
+
+        // 적 충돌 처리
+        // FIXME: 적-플레이어 충돌 처리만 있음
+        for (int i = 0; i < enemies.size; i++){
+            Enemy e = enemies.get(i);
+
+            if (!player.overlaps(e.col)) continue;
+
+            Vector2 e2pVec = new Vector2(player.x - e.col.x, player.y - e.col.y).nor();
+
+            // 돌진 중이라면
+            if (forceDir.len() > 0.1f){
+                e.hp--;
+
+                // 튕김
+                forceDir.x = e2pVec.x * 900;
+                forceDir.y = e2pVec.y * 900;
+            }
+            else {
+                playerHP--;
+                if (playerHP <= 0){}
+                    // 사망
+
+                // 살짝 튕김
+                forceDir.x = e2pVec.x * 600;
+                forceDir.y = e2pVec.y * 600;
+
+
+            }
+
+
+
+        }
 
         // 4. 낭떠러지에 떨어지면 시작점으로 복귀합니다.
         if (player.y < -100) {
