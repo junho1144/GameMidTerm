@@ -24,7 +24,7 @@ public class Main extends ApplicationAdapter {
     private static final float GRAVITY = 1700;
 
     private SpriteBatch batch;
-    private Texture playerTexture, blockTexture, flagTexture;
+    private Texture playerTexture, blockTexture, flagTexture,backgroundTexture, energyBallTexture;
     private OrthographicCamera camera;
     private FitViewport viewport;
 
@@ -38,8 +38,6 @@ public class Main extends ApplicationAdapter {
 
     private boolean facingLeft = true;
 
-
-    private Texture backgroundTexture;
     private static final float BG_SPEED = 0.3f;
 
 
@@ -57,6 +55,7 @@ public class Main extends ApplicationAdapter {
         blockTexture = new Texture(Gdx.files.internal("block.png"));
         flagTexture = new Texture(Gdx.files.internal("flag.png"));
         backgroundTexture = new Texture(Gdx.files.internal("Background1.jpg"));
+        energyBallTexture = new Texture(Gdx.files.internal("DashEnergyBall.png"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
@@ -107,6 +106,19 @@ public class Main extends ApplicationAdapter {
             player.x, player.y, player.width, player.height,
             0, 0, playerTexture.getWidth(), playerTexture.getHeight(),
             !facingLeft, false);
+
+        // 마우스 주변 에너지볼
+        if (remainDash >= 1){
+            batch.draw(energyBallTexture, mouse.x - 10f, mouse.y + 8f, 20,20);
+        }
+        if (remainDash >= 2){
+            batch.draw(energyBallTexture, mouse.x - 30f, mouse.y - 35f, 20,20);
+        }
+        if (remainDash >= 3){
+            batch.draw(energyBallTexture, mouse.x + 10f, mouse.y - 35f, 20,20);
+        }
+
+
         batch.end();
 
     }
@@ -116,11 +128,11 @@ public class Main extends ApplicationAdapter {
     private void update(float dt) {
         if (gameOver || dt <= 0) return;
 
+        mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        viewport.unproject(mouse);
+
         // 마우스 클릭 - 그 방향으로 힘 대쉬함
         if (Gdx.input.justTouched() && remainDash > 0) {
-            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            viewport.unproject(mouse);
-
             forceDir.set(mouse.x - player.x, mouse.y - player.y);
 
             forceDir.nor().scl(1000); // 일반화후 힘만큼
