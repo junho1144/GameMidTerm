@@ -52,6 +52,17 @@ public class Main extends ApplicationAdapter {
 
 
 
+    private float shakeTimer = 0; // 남은시간
+    private float shakeDuration = 0.2f; // 전체시간
+    private float shakePower = 0;
+    private void CameraShake(float power, float duration) {
+        shakePower = power;
+        shakeDuration = duration;
+        shakeTimer = duration;
+    }
+
+
+
     private final Array<Enemy> enemies = new Array<>();
 
 
@@ -184,6 +195,8 @@ public class Main extends ApplicationAdapter {
             grounded = false;
             facingLeft = (forceDir.x < 0f);
             remainDash--;
+
+            CameraShake(2, 0.1f);
         }
 
 
@@ -237,12 +250,15 @@ public class Main extends ApplicationAdapter {
                     // 튕김
                     forceDir.x = e2pVec.x * 900;
                     forceDir.y = e2pVec.y * 900;
+
+                    CameraShake(10, 0.15f);
                 }
                 else if (invincibleTime <= 0f) {
                     PlayerDealt();
                     // 살짝 튕김
                     forceDir.x = e2pVec.x * 600;
                     forceDir.y = e2pVec.y * 600;
+
                 }
             }
         }
@@ -259,7 +275,17 @@ public class Main extends ApplicationAdapter {
         if (player.overlaps(flag)) gameOver = true;
 
         // 6. 카메라는 X축으로만 따라갑니다.
-        camera.position.x = MathUtils.clamp(player.x + player.width / 2, 400, WORLD_WIDTH - 400);
+        float camX = MathUtils.clamp(player.x + player.width / 2, 400, WORLD_WIDTH - 400);
+        float camY = 300;
+
+        if (shakeTimer > 0f) {
+            shakeTimer -= dt;
+            float power = shakePower * (shakeTimer / shakeDuration);
+            camX += MathUtils.random(-power, power);
+            camY += MathUtils.random(-power, power);
+        }
+
+        camera.position.set(camX, camY, 0);
         camera.update();
     }
 
@@ -304,8 +330,7 @@ public class Main extends ApplicationAdapter {
         }
 
         invincibleTime = 1.0f;
-
-
+        CameraShake(10, 0.15f);
     }
 
 
