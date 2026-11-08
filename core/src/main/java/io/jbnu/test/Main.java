@@ -25,7 +25,7 @@ public class Main extends ApplicationAdapter {
 
     private SpriteBatch batch;
     private Texture playerTexture, blockTexture, flagTexture,backgroundTexture, energyBallTexture;
-    private Texture enemy1Texture;
+    private Texture enemy1Texture, enemy2Texture, enemy3Texture;
     private OrthographicCamera camera;
     private FitViewport viewport;
 
@@ -48,6 +48,8 @@ public class Main extends ApplicationAdapter {
     private final Vector2 forceDir = new Vector2(); // 힘의 방향
     private int remainDash = 0; // 남은 대쉬 횟수
 
+    private float invincibleTime = 0f; // 남은 무적 시간
+
 
 
     private final Array<Enemy> enemies = new Array<>();
@@ -62,6 +64,8 @@ public class Main extends ApplicationAdapter {
         backgroundTexture = new Texture(Gdx.files.internal("Background1.jpg"));
         energyBallTexture = new Texture(Gdx.files.internal("DashEnergyBall.png"));
         enemy1Texture = new Texture(Gdx.files.internal("Enemy1.png"));
+        enemy2Texture = new Texture(Gdx.files.internal("Enemy2.png"));
+        enemy3Texture = new Texture(Gdx.files.internal("Enemy3.png"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
@@ -81,7 +85,7 @@ public class Main extends ApplicationAdapter {
         blocks.add(new Rectangle(2100, 270, 110, 24));
         blocks.add(new Rectangle(2280, 320, 210, 24));
 
-        enemies.add(new Enemy(500, 60, 32, 32, 3));
+        enemies.add(new Enemy(0, 500, 100, 64, 64, 10));
     }
 
 
@@ -110,15 +114,38 @@ public class Main extends ApplicationAdapter {
             batch.draw(blockTexture, block.x, block.y, block.width, block.height);
         }
         batch.draw(flagTexture, flag.x, flag.y, flag.width, flag.height);
-        batch.draw(playerTexture,
-            player.x, player.y, player.width, player.height,
-            0, 0, playerTexture.getWidth(), playerTexture.getHeight(),
-            !facingLeft, false);
+
+        if (invincibleTime <= 0 || ((int) (invincibleTime * 20) % 2 == 0)){
+            batch.draw(playerTexture,
+                player.x, player.y, player.width, player.height,
+                0, 0, playerTexture.getWidth(), playerTexture.getHeight(),
+                !facingLeft, false);
+        }
+
 
         // 적들
         for (Enemy e : enemies) {
-            batch.draw(enemy1Texture, e.col.x, e.col.y, e.col.width, e.col.height);
+
+            if (e.hitTime > 0) {
+                batch.setColor(1f, 0.2f, 0.2f, 1f);
+            } else {
+                batch.setColor(1f, 1f, 1f, 1f);
+            }
+
+            switch (e.type){
+                case 0:
+                    batch.draw(enemy1Texture, e.col.x, e.col.y, e.col.width, e.col.height);
+                    break;
+                case 1:
+                    batch.draw(enemy2Texture, e.col.x, e.col.y, e.col.width, e.col.height);
+                    break;
+                case 2:
+                    batch.draw(enemy3Texture, e.col.x, e.col.y, e.col.width, e.col.height);
+                    break;
+            }
+
         }
+        batch.setColor(1f, 1f, 1f, 1f);
 
         // 마우스 주변 에너지볼
         if (remainDash >= 1){
@@ -140,6 +167,9 @@ public class Main extends ApplicationAdapter {
 
     private void update(float dt) {
         if (gameOver || dt <= 0) return;
+
+        invincibleTime -= dt;
+
 
         mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         viewport.unproject(mouse);
@@ -196,36 +226,30 @@ public class Main extends ApplicationAdapter {
         for (int i = 0; i < enemies.size; i++){
             Enemy e = enemies.get(i);
 
-            if (!player.overlaps(e.col)) continue;
+            e.hitTime -= dt;
 
-            Vector2 e2pVec = new Vector2(player.x - e.col.x, player.y - e.col.y).nor();
-
-            // 돌진 중이라면
-            if (forceDir.len() > 0.1f){
-                e.hp--;
-
-                // 튕김
-                forceDir.x = e2pVec.x * 900;
-                forceDir.y = e2pVec.y * 900;
+            // 플레이어-적 충돌
+            if (player.overlaps(e.col)){
+                Vector2 e2pVec = new Vector2(player.x - e.col.x, player.y - e.col.y).nor();
+                // 돌진 중이라면
+                if (forceDir.len() > 0.1f && e.hitTime <= 0f){
+                    e.Dealt();
+                    // 튕김
+                    forceDir.x = e2pVec.x * 900;
+                    forceDir.y = e2pVec.y * 900;
+                }
+                else if (invincibleTime <= 0f) {
+                    PlayerDealt();
+                    // 살짝 튕김
+                    forceDir.x = e2pVec.x * 600;
+                    forceDir.y = e2pVec.y * 600;
+                }
             }
-            else {
-                playerHP--;
-                if (playerHP <= 0){}
-                    // 사망
-
-                // 살짝 튕김
-                forceDir.x = e2pVec.x * 600;
-                forceDir.y = e2pVec.y * 600;
-
-
-            }
-
-
-
         }
 
         // 4. 낭떠러지에 떨어지면 시작점으로 복귀합니다.
         if (player.y < -100) {
+            PlayerDealt();
             player.setPosition(80, 60);
             velocityY = 0;
             grounded = false;
@@ -271,6 +295,17 @@ public class Main extends ApplicationAdapter {
         remainDash = 3;
         forceDir.x = 0f;
         forceDir.y = 0f;
+    }
+
+    private void PlayerDealt(){
+        playerHP--;
+        if (playerHP <= 0){
+            // 사망 로직
+        }
+
+        invincibleTime = 1.0f;
+
+
     }
 
 

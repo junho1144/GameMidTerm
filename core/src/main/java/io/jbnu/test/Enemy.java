@@ -9,8 +9,20 @@ public class Enemy {
 
     public final Rectangle col;
 
-    public Enemy(float x, float y, float w, float h, int hp) {
+    public int type;
+
+    public Enemy(int type, float x, float y, float w, float h, int hp) {
+        this.type = type;
         this.col = new Rectangle(x, y, w, h);
         this.hp = hp;
     }
+
+    public void Dealt(){
+        hp--;
+        hitTime = 0.3f;
+    }
+    public float hitTime;
+
+
+
 }
