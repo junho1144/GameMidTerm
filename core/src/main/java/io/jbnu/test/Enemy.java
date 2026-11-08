@@ -17,10 +17,7 @@ public class Enemy {
         this.hp = hp;
     }
 
-    public void Dealt(){
-        hp--;
-        hitTime = 0.3f;
-    }
+
     public float hitTime;
 
 

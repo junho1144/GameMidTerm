@@ -18,7 +18,7 @@ import com.badlogic.gdx.math.Vector2;
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
 
-    private static final float WORLD_WIDTH = 2600;
+
     private static final float MOVE_SPEED = 260;
     private static final float JUMP_SPEED = 650;
     private static final float GRAVITY = 1700;
@@ -63,6 +63,14 @@ public class Main extends ApplicationAdapter {
 
 
 
+
+    private int stage = 1;
+    private static final int MAX_STAGE = 3;
+    private float worldWidth = 2600;
+    private final Vector2 spawn = new Vector2(80, 60);
+
+
+
     private final Array<Enemy> enemies = new Array<>();
 
 
@@ -83,20 +91,60 @@ public class Main extends ApplicationAdapter {
         viewport = new FitViewport(800, 600, camera);
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
 
-        // x, y, 너비, 높이. 바닥도 같은 충돌 블록입니다.
-        blocks.add(new Rectangle(0, 0, 620, 60));
-        blocks.add(new Rectangle(760, 0, 540, 60));
-        blocks.add(new Rectangle(1440, 0, 1160, 60));
-        blocks.add(new Rectangle(300, 60, 80, 64));
-        blocks.add(new Rectangle(900, 60, 96, 80));
-        blocks.add(new Rectangle(1080, 180, 160, 24));
-        blocks.add(new Rectangle(1650, 60, 120, 70));
-        blocks.add(new Rectangle(1790, 60, 120, 140));
-        blocks.add(new Rectangle(1930, 60, 120, 210));
-        blocks.add(new Rectangle(2100, 270, 110, 24));
-        blocks.add(new Rectangle(2280, 320, 210, 24));
+        loadStage(1);
+    }
 
-        enemies.add(new Enemy(0, 500, 100, 64, 64, 10));
+    private void loadStage(int n) {
+        stage = n;
+
+        // 초기화
+        blocks.clear();
+        enemies.clear();
+        player.setPosition(spawn.x, spawn.y);
+        velocityX = velocityY = 0;
+        forceDir.x = 0f;
+        forceDir.y = 0f;
+        grounded = false;
+        playerHP = 3;
+        invincibleTime = 0;
+        shakeTimer = 0;
+
+        switch (n) {
+            case 1:
+                worldWidth = 2600;
+                blocks.add(new Rectangle(0, 0, 620, 60));
+                blocks.add(new Rectangle(760, 0, 540, 60));
+                blocks.add(new Rectangle(1440, 0, 1160, 60));
+                blocks.add(new Rectangle(300, 60, 80, 64));
+                blocks.add(new Rectangle(1080, 180, 160, 24));
+
+                enemies.add(new Enemy(1, 300, 300, 80, 80, 10));
+                break;
+
+            case 2:
+                worldWidth = 3000;
+                blocks.add(new Rectangle(0, 0, 800, 60));
+                blocks.add(new Rectangle(950, 0, 700, 60));
+                blocks.add(new Rectangle(1800, 0, 1200, 60));
+                blocks.add(new Rectangle(500, 60, 100, 100));
+                blocks.add(new Rectangle(1200, 150, 200, 24));
+                blocks.add(new Rectangle(2200, 60, 120, 120));
+
+                enemies.add(new Enemy(2, 300, 300, 80, 80, 10));
+                break;
+
+            case 3:
+                worldWidth = 3400;
+                blocks.add(new Rectangle(0, 0, 500, 60));
+                blocks.add(new Rectangle(650, 0, 400, 60));
+                blocks.add(new Rectangle(1200, 0, 400, 60));
+                blocks.add(new Rectangle(1750, 0, 1650, 60));
+                blocks.add(new Rectangle(900, 120, 120, 24));
+                blocks.add(new Rectangle(2300, 60, 150, 150));
+
+                enemies.add(new Enemy(3, 300, 300, 80, 80, 10));
+                break;
+        }
     }
 
 
@@ -118,7 +166,7 @@ public class Main extends ApplicationAdapter {
         // BG
         float screenLeft = camera.position.x - 400;
         float bgX = screenLeft * (1 - BG_SPEED);
-        float bgWidth = 800 + (WORLD_WIDTH - 800) * BG_SPEED;
+        float bgWidth = 800 + (worldWidth - 800) * BG_SPEED;
         batch.draw(backgroundTexture, bgX, 0, bgWidth, 600);
 
         for (Rectangle block : blocks) {
@@ -144,13 +192,13 @@ public class Main extends ApplicationAdapter {
             }
 
             switch (e.type){
-                case 0:
+                case 1:
                     batch.draw(enemy1Texture, e.col.x, e.col.y, e.col.width, e.col.height);
                     break;
-                case 1:
+                case 2:
                     batch.draw(enemy2Texture, e.col.x, e.col.y, e.col.width, e.col.height);
                     break;
-                case 2:
+                case 3:
                     batch.draw(enemy3Texture, e.col.x, e.col.y, e.col.width, e.col.height);
                     break;
             }
@@ -246,7 +294,7 @@ public class Main extends ApplicationAdapter {
                 Vector2 e2pVec = new Vector2(player.x - e.col.x, player.y - e.col.y).nor();
                 // 돌진 중이라면
                 if (forceDir.len() > 0.1f && e.hitTime <= 0f){
-                    e.Dealt();
+                    EnemyDealt(e);
                     // 튕김
                     forceDir.x = e2pVec.x * 900;
                     forceDir.y = e2pVec.y * 900;
@@ -275,7 +323,7 @@ public class Main extends ApplicationAdapter {
         if (player.overlaps(flag)) gameOver = true;
 
         // 6. 카메라는 X축으로만 따라갑니다.
-        float camX = MathUtils.clamp(player.x + player.width / 2, 400, WORLD_WIDTH - 400);
+        float camX = MathUtils.clamp(player.x + player.width / 2, 400, worldWidth - 400);
         float camY = 300;
 
         if (shakeTimer > 0f) {
@@ -287,6 +335,17 @@ public class Main extends ApplicationAdapter {
 
         camera.position.set(camX, camY, 0);
         camera.update();
+
+        if (allEnemiesDead()) {
+            loadStage(stage % MAX_STAGE + 1);
+            return;
+        }
+    }
+    private boolean allEnemiesDead() {
+        for (int i = 0; i < enemies.size; i++) {
+            if (enemies.get(i).hp > 0) return false;
+        }
+        return true;
     }
 
     private void moveX(float dt) {
@@ -296,7 +355,7 @@ public class Main extends ApplicationAdapter {
             if (velocityX > 0) player.x = block.x - player.width;
             else if (velocityX < 0) player.x = block.x + block.width;
         }
-        player.x = MathUtils.clamp(player.x, 0, WORLD_WIDTH - player.width);
+        player.x = MathUtils.clamp(player.x, 0, worldWidth - player.width);
     }
 
     private void moveY(float dt) {
@@ -326,11 +385,16 @@ public class Main extends ApplicationAdapter {
     private void PlayerDealt(){
         playerHP--;
         if (playerHP <= 0){
-            // 사망 로직
+            loadStage(stage);
+            return;
         }
 
         invincibleTime = 1.0f;
         CameraShake(10, 0.15f);
+    }
+    private void EnemyDealt(Enemy e){
+        e.hp--;
+        e.hitTime = 0.3f;
     }
 
 
