@@ -1,24 +1,18 @@
 package io.jbnu.test;
 
-import static com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable.draw;
-
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.Vector2;
 
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -47,6 +41,12 @@ public class Main extends ApplicationAdapter {
 
     private Texture backgroundTexture;
     private static final float BG_SPEED = 0.3f;
+
+
+
+
+    private final Vector3 mouse = new Vector3(); // 마우스 클릭시
+    private final Vector2 forceDir = new Vector2(); // 힘의 방향
 
 
     @Override
@@ -115,6 +115,22 @@ public class Main extends ApplicationAdapter {
     private void update(float dt) {
         if (gameOver || dt <= 0) return;
 
+        // 마우스 클릭 - 그 방향으로 힘
+        if (Gdx.input.justTouched()) {
+            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            viewport.unproject(mouse);
+
+            forceDir.set(mouse.x - player.x, mouse.y - player.y);
+
+            if (forceDir.len() > 0f) {
+                forceDir.nor().scl(700); // 일반화후 힘만큼
+                velocityX = 0;
+                velocityY = 0;
+                grounded = false;
+            }
+        }
+
+
         // 1. 좌우 이동과 지상 점프
         velocityX = 0;
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
@@ -132,6 +148,14 @@ public class Main extends ApplicationAdapter {
 
         // 2. 중력: 아래쪽 속도는 음수이며 최대 낙하 속도를 제한합니다.
         velocityY = Math.max(velocityY - GRAVITY * dt, -900);
+
+        // 힘 감소
+        forceDir.x *= 0.95f;
+        forceDir.y *= 0.95f;
+        if (forceDir.len() < 10f) {
+            forceDir.x = 0f;
+            forceDir.y = 0f;
+        }
 
         // 3. X축과 Y축을 나누어 이동하고 충돌을 보정합니다.
         moveX(dt);
@@ -153,7 +177,7 @@ public class Main extends ApplicationAdapter {
     }
 
     private void moveX(float dt) {
-        player.x += velocityX * dt;
+        player.x += (velocityX + forceDir.x) * dt;
         for (Rectangle block : blocks) {
             if (!player.overlaps(block)) continue;
             if (velocityX > 0) player.x = block.x - player.width;
@@ -163,7 +187,7 @@ public class Main extends ApplicationAdapter {
     }
 
     private void moveY(float dt) {
-        float dy = velocityY * dt;
+        float dy = (velocityY + forceDir.y) * dt;
         player.y += dy;
         grounded = false;
 
