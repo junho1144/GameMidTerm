@@ -120,7 +120,7 @@ public class Main extends ApplicationAdapter {
                 blocks.add(new Rectangle(300, 60, 80, 64));
                 blocks.add(new Rectangle(1080, 180, 160, 24));
 
-                enemies.add(new Enemy(1, 300, 300, 80, 80, 10));
+                enemies.add(new Enemy(1, 300, 300, 80, 80, 2));
                 break;
 
             case 2:
@@ -132,7 +132,7 @@ public class Main extends ApplicationAdapter {
                 blocks.add(new Rectangle(1200, 150, 200, 24));
                 blocks.add(new Rectangle(2200, 60, 120, 120));
 
-                enemies.add(new Enemy(2, 300, 300, 80, 80, 10));
+                enemies.add(new Enemy(2, 300, 300, 80, 80, 2));
                 break;
 
             case 3:
@@ -144,7 +144,7 @@ public class Main extends ApplicationAdapter {
                 blocks.add(new Rectangle(900, 120, 120, 24));
                 blocks.add(new Rectangle(2300, 60, 150, 150));
 
-                enemies.add(new Enemy(3, 300, 300, 80, 80, 10));
+                enemies.add(new Enemy(3, 300, 300, 80, 80, 2));
                 break;
         }
     }
@@ -301,6 +301,36 @@ public class Main extends ApplicationAdapter {
             Enemy e = enemies.get(i);
 
             e.hitTime -= dt;
+
+            // 이동
+            switch (e.type){
+                case 1:
+                    break;
+                case 2:
+                    e.col.x += 100f * dt * e.goRight;
+                    if (e.col.x < 300f) {
+                        e.goRight = 1;
+                    } else if (e.col.x > worldWidth - 300f) {
+                        e.goRight = -1;
+                    }
+                    break;
+                case 3:
+                    e.col.x += 120f * dt * e.goRight;
+                    if (e.col.x < 300f) {
+                        e.goRight = 1;
+                    } else if (e.col.x > worldWidth - 300f) {
+                        e.goRight = -1;
+                    }
+                    e.col.y += 80f * dt * e.goUp;
+                    if (e.col.y < 100f) {
+                        e.goUp = 1;
+                    } else if (e.col.y > 500f) {
+                        e.goUp = -1;
+                    }
+                    break;
+
+
+            }
 
             // 플레이어-적 충돌
             if (player.overlaps(e.col)){

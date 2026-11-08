@@ -20,6 +20,9 @@ public class Enemy {
 
     public float hitTime;
 
+    public int goRight = 1;
+    public int goUp = 1;
+
 
 
 }
