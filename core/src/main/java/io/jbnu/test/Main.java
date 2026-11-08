@@ -42,10 +42,13 @@ public class Main extends ApplicationAdapter {
     private boolean gameOver;
 
 
+    private boolean facingLeft = true;
+
+
     @Override
     public void create() {
         batch = new SpriteBatch();
-        playerTexture = new Texture(Gdx.files.internal("player.png"));
+        playerTexture = new Texture(Gdx.files.internal("KnightLeft.png"));
         blockTexture = new Texture(Gdx.files.internal("block.png"));
         flagTexture = new Texture(Gdx.files.internal("flag.png"));
 
@@ -87,7 +90,10 @@ public class Main extends ApplicationAdapter {
             batch.draw(blockTexture, block.x, block.y, block.width, block.height);
         }
         batch.draw(flagTexture, flag.x, flag.y, flag.width, flag.height);
-        batch.draw(playerTexture, player.x, player.y, player.width, player.height);
+        batch.draw(playerTexture,
+            player.x, player.y, player.width, player.height,
+            0, 0, playerTexture.getWidth(), playerTexture.getHeight(),
+            !facingLeft, false);
         batch.end();
 
     }
@@ -99,8 +105,14 @@ public class Main extends ApplicationAdapter {
 
         // 1. 좌우 이동과 지상 점프
         velocityX = 0;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) velocityX -= MOVE_SPEED;
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) velocityX += MOVE_SPEED;
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            velocityX -= MOVE_SPEED;
+            facingLeft = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            velocityX += MOVE_SPEED;
+            facingLeft = false;
+        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && grounded) {
             velocityY = JUMP_SPEED;
             grounded = false;
