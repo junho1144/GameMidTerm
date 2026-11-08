@@ -47,6 +47,7 @@ public class Main extends ApplicationAdapter {
 
     private final Vector3 mouse = new Vector3(); // 마우스 클릭시
     private final Vector2 forceDir = new Vector2(); // 힘의 방향
+    private int remainDash = 0; // 남은 대쉬 횟수
 
 
     @Override
@@ -115,19 +116,18 @@ public class Main extends ApplicationAdapter {
     private void update(float dt) {
         if (gameOver || dt <= 0) return;
 
-        // 마우스 클릭 - 그 방향으로 힘
-        if (Gdx.input.justTouched()) {
+        // 마우스 클릭 - 그 방향으로 힘 대쉬함
+        if (Gdx.input.justTouched() && remainDash > 0) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             viewport.unproject(mouse);
 
             forceDir.set(mouse.x - player.x, mouse.y - player.y);
 
-            if (forceDir.len() > 0f) {
-                forceDir.nor().scl(700); // 일반화후 힘만큼
-                velocityX = 0;
-                velocityY = 0;
-                grounded = false;
-            }
+            forceDir.nor().scl(1000); // 일반화후 힘만큼
+            velocityX = 0;
+            velocityY = 0;
+            grounded = false;
+            remainDash--;
         }
 
 
@@ -196,12 +196,16 @@ public class Main extends ApplicationAdapter {
             if (dy < 0) { // 내려오던 중: 블록 위에 착지
                 player.y = block.y + block.height;
                 velocityY = 0;
-                grounded = true;
+                Land();
             } else if (dy > 0) { // 올라가던 중: 블록 아래에 머리 충돌
                 player.y = block.y - player.height;
                 velocityY = 0;
             }
         }
+    }
+    private void Land(){
+        grounded = true;
+        remainDash = 3;
     }
 
 
