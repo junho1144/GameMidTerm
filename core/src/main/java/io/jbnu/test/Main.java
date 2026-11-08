@@ -45,12 +45,17 @@ public class Main extends ApplicationAdapter {
     private boolean facingLeft = true;
 
 
+    private Texture backgroundTexture;
+    private static final float BG_SPEED = 0.3f;
+
+
     @Override
     public void create() {
         batch = new SpriteBatch();
         playerTexture = new Texture(Gdx.files.internal("KnightLeft.png"));
         blockTexture = new Texture(Gdx.files.internal("block.png"));
         flagTexture = new Texture(Gdx.files.internal("flag.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Background1.jpg"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
@@ -86,6 +91,13 @@ public class Main extends ApplicationAdapter {
         viewport.apply();
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+
+        // BG
+        float screenLeft = camera.position.x - 400;
+        float bgX = screenLeft * (1 - BG_SPEED);
+        float bgWidth = 800 + (WORLD_WIDTH - 800) * BG_SPEED;
+        batch.draw(backgroundTexture, bgX, 0, bgWidth, 600);
+
         for (Rectangle block : blocks) {
             batch.draw(blockTexture, block.x, block.y, block.width, block.height);
         }
