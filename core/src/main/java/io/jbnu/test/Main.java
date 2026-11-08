@@ -26,6 +26,7 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private Texture playerTexture, blockTexture, flagTexture,backgroundTexture, energyBallTexture;
     private Texture enemy1Texture, enemy2Texture, enemy3Texture;
+    private Texture obstacle1Texture, obstacle2Texture, obstacle3Texture;
     private Texture heartTexture;
     private OrthographicCamera camera;
     private FitViewport viewport;
@@ -88,6 +89,9 @@ public class Main extends ApplicationAdapter {
         enemy2Texture = new Texture(Gdx.files.internal("Enemy2.png"));
         enemy3Texture = new Texture(Gdx.files.internal("Enemy3.png"));
         heartTexture = new Texture(Gdx.files.internal("HealthSkull.png"));
+        obstacle1Texture = new Texture(Gdx.files.internal("Obstacle1.png"));
+        obstacle2Texture = new Texture(Gdx.files.internal("obstacle2.png"));
+        obstacle3Texture = new Texture(Gdx.files.internal("obstacle3.png"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
@@ -123,6 +127,10 @@ public class Main extends ApplicationAdapter {
                 blocks.add(new Rectangle(1080, 180, 160, 24));
 
                 enemies.add(new Enemy(1, 300, 300, 80, 80, 2));
+
+                obstacles.add(new Obstacle(1, 100f, 100f, 60f, 10f, 1f, 1f, 20f));
+                obstacles.add(new Obstacle(2, 200f, 200f, 50f, 50f, 1f, 1f, 20f));
+                obstacles.add(new Obstacle(3, 300f, 300f, 50f, 50f, 1f, -1f, 20f));
                 break;
 
             case 2:
@@ -225,16 +233,43 @@ public class Main extends ApplicationAdapter {
         // 장애물
         for (int i = 0; i < obstacles.size; i++) {
             Obstacle o = obstacles.get(i);
-            /*
-            batch.draw(obstacleTexture,
-                o.bounds.x, o.bounds.y,
-                o.bounds.width / 2, o.bounds.height / 2,
-                o.bounds.width, o.bounds.height,
-                1f, 1f,
-                o.getAngle(),
-                0, 0, obstacleTexture.getWidth(), obstacleTexture.getHeight(),
-                false, false);
-            */
+
+            switch (o.type){
+                case 1:
+                    batch.draw(obstacle1Texture,
+                        o.bounds.x, o.bounds.y,
+                        o.bounds.width / 2, o.bounds.height / 2,
+                        o.bounds.width, o.bounds.height,
+                        1f, 1f,
+                        o.getAngle(),
+                        0, 0, obstacle1Texture.getWidth(), obstacle1Texture.getHeight(),
+                        false, false);
+                    break;
+                case 2:
+                    batch.draw(obstacle2Texture,
+                        o.bounds.x, o.bounds.y,
+                        o.bounds.width / 2, o.bounds.height / 2,
+                        o.bounds.width, o.bounds.height,
+                        1f, 1f,
+                        o.getAngle(),
+                        0, 0, obstacle2Texture.getWidth(), obstacle2Texture.getHeight(),
+                        false, false);
+                    break;
+                case 3:
+                    batch.draw(obstacle3Texture,
+                        o.bounds.x, o.bounds.y,
+                        o.bounds.width / 2, o.bounds.height / 2,
+                        o.bounds.width, o.bounds.height,
+                        1f, 1f,
+                        o.getAngle(),
+                        0, 0, obstacle3Texture.getWidth(), obstacle3Texture.getHeight(),
+                        false, false);
+                    break;
+
+            }
+
+
+
         }
 
 

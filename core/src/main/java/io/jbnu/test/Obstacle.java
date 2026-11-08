@@ -9,13 +9,14 @@ public class Obstacle {
     private final Vector2 direction = new Vector2();   // 이동 방향 (길이 1)
     private final float speed;
 
+    public int type;
 
-    public Obstacle(float x, float y, float w, float h, int damage) {
-        this(x, y, w, h, 1, 0, 0);
-    }
 
-    public Obstacle(float x, float y, float w, float h,
+
+
+    public Obstacle(int type, float x, float y, float w, float h,
                     float dirX, float dirY, float speed) {
+        this.type = type;
         this.bounds = new Rectangle(x, y, w, h);
         this.speed = speed;
         this.direction.set(dirX, dirY);
