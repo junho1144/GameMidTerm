@@ -139,21 +139,26 @@ public class Main extends ApplicationAdapter {
             velocityX = 0;
             velocityY = 0;
             grounded = false;
+            facingLeft = (forceDir.x < 0f);
             remainDash--;
         }
 
 
         // 1. 좌우 이동과 지상 점프
         velocityX = 0;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.A) ||
+            Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             velocityX -= MOVE_SPEED;
             facingLeft = true;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.D) ||
+            Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             velocityX += MOVE_SPEED;
             facingLeft = false;
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && grounded) {
+        if ((Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
+            Gdx.input.isKeyJustPressed(Input.Keys.W)) &&
+            grounded) {
             velocityY = JUMP_SPEED;
             grounded = false;
         }
@@ -218,6 +223,8 @@ public class Main extends ApplicationAdapter {
     private void Land(){
         grounded = true;
         remainDash = 3;
+        forceDir.x = 0f;
+        forceDir.y = 0f;
     }
 
 
