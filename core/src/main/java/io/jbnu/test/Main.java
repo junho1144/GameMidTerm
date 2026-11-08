@@ -26,6 +26,7 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private Texture playerTexture, blockTexture, flagTexture,backgroundTexture, energyBallTexture;
     private Texture enemy1Texture, enemy2Texture, enemy3Texture;
+    private Texture heartTexture;
     private OrthographicCamera camera;
     private FitViewport viewport;
 
@@ -85,6 +86,7 @@ public class Main extends ApplicationAdapter {
         enemy1Texture = new Texture(Gdx.files.internal("Enemy1.png"));
         enemy2Texture = new Texture(Gdx.files.internal("Enemy2.png"));
         enemy3Texture = new Texture(Gdx.files.internal("Enemy3.png"));
+        heartTexture = new Texture(Gdx.files.internal("HealthSkull.png"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
@@ -105,7 +107,7 @@ public class Main extends ApplicationAdapter {
         forceDir.x = 0f;
         forceDir.y = 0f;
         grounded = false;
-        playerHP = 3;
+        playerHP = 5;
         invincibleTime = 0;
         shakeTimer = 0;
 
@@ -172,13 +174,24 @@ public class Main extends ApplicationAdapter {
         for (Rectangle block : blocks) {
             batch.draw(blockTexture, block.x, block.y, block.width, block.height);
         }
-        batch.draw(flagTexture, flag.x, flag.y, flag.width, flag.height);
+        //batch.draw(flagTexture, flag.x, flag.y, flag.width, flag.height);
 
         if (invincibleTime <= 0 || ((int) (invincibleTime * 20) % 2 == 0)){
             batch.draw(playerTexture,
                 player.x, player.y, player.width, player.height,
                 0, 0, playerTexture.getWidth(), playerTexture.getHeight(),
                 !facingLeft, false);
+        }
+
+        // hp표시
+        int heartSize = 14;
+        float heartGap = 1f;
+        float totalWidth = playerHP * heartSize + (playerHP - 1) * heartGap;
+        float startX = player.x + player.width / 2 - totalWidth / 2;
+        float heartY = player.y + player.height + 1f;
+
+        for (int i = 0; i < playerHP; i++) {
+            batch.draw(heartTexture, startX + i * (heartSize + heartGap), heartY, heartSize, heartSize);
         }
 
 
@@ -320,7 +333,7 @@ public class Main extends ApplicationAdapter {
         }
 
         // 5. 깃발에 닿으면 게임 로직을 멈추고 마지막 화면을 유지합니다.
-        if (player.overlaps(flag)) gameOver = true;
+        //if (player.overlaps(flag)) gameOver = true;
 
         // 6. 카메라는 X축으로만 따라갑니다.
         float camX = MathUtils.clamp(player.x + player.width / 2, 400, worldWidth - 400);
@@ -377,7 +390,8 @@ public class Main extends ApplicationAdapter {
     }
     private void Land(){
         grounded = true;
-        remainDash = 3;
+        // 현재 스테이지에 따라 최대대쉬 수 다름
+        remainDash = stage;
         forceDir.x = 0f;
         forceDir.y = 0f;
     }
