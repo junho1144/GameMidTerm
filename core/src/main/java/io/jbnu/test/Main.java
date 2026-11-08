@@ -73,6 +73,7 @@ public class Main extends ApplicationAdapter {
 
 
     private final Array<Enemy> enemies = new Array<>();
+    private final Array<Obstacle> obstacles = new Array<>();
 
 
     @Override
@@ -102,6 +103,7 @@ public class Main extends ApplicationAdapter {
         // 초기화
         blocks.clear();
         enemies.clear();
+        obstacles.clear();
         player.setPosition(spawn.x, spawn.y);
         velocityX = velocityY = 0;
         forceDir.x = 0f;
@@ -218,6 +220,23 @@ public class Main extends ApplicationAdapter {
 
         }
         batch.setColor(1f, 1f, 1f, 1f);
+
+
+        // 장애물
+        for (int i = 0; i < obstacles.size; i++) {
+            Obstacle o = obstacles.get(i);
+            /*
+            batch.draw(obstacleTexture,
+                o.bounds.x, o.bounds.y,
+                o.bounds.width / 2, o.bounds.height / 2,
+                o.bounds.width, o.bounds.height,
+                1f, 1f,
+                o.getAngle(),
+                0, 0, obstacleTexture.getWidth(), obstacleTexture.getHeight(),
+                false, false);
+            */
+        }
+
 
         // 마우스 주변 에너지볼
         if (remainDash >= 1){
@@ -352,6 +371,21 @@ public class Main extends ApplicationAdapter {
 
                 }
             }
+        }
+
+        // 장애물
+        for (int i = obstacles.size - 1; i >= 0; i--) {
+            Obstacle o = obstacles.get(i);
+            o.update(dt);
+            if (o.isOutOfWorld(worldWidth)) {
+                obstacles.removeIndex(i);
+                continue;
+            }
+
+            // 피해
+            if (invincibleTime > 0 || !player.overlaps(o.bounds)) continue;
+            PlayerDealt();
+            CameraShake(12f, 0.3f);
         }
 
         // 4. 낭떠러지에 떨어지면 시작점으로 복귀합니다.
