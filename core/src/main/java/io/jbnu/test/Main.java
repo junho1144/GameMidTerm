@@ -48,7 +48,7 @@ public class Main extends ApplicationAdapter {
 
     private final Vector3 mouse = new Vector3(); // 마우스 클릭시
     private final Vector2 forceDir = new Vector2(); // 힘의 방향
-    private int remainDash = 0; // 남은 대쉬 횟수
+    private float remainDash = 0f; // 남은 대쉬 횟수
 
     private float invincibleTime = 0f; // 남은 무적 시간
 
@@ -239,7 +239,7 @@ public class Main extends ApplicationAdapter {
                     batch.draw(obstacle1Texture,
                         o.bounds.x, o.bounds.y,
                         o.bounds.width / 2, o.bounds.height / 2,
-                        o.bounds.width, o.bounds.height,
+                        o.bounds.width * 1.8f, o.bounds.height * 2,
                         1f, 1f,
                         o.getAngle(),
                         0, 0, obstacle1Texture.getWidth(), obstacle1Texture.getHeight(),
@@ -249,7 +249,7 @@ public class Main extends ApplicationAdapter {
                     batch.draw(obstacle2Texture,
                         o.bounds.x, o.bounds.y,
                         o.bounds.width / 2, o.bounds.height / 2,
-                        o.bounds.width, o.bounds.height,
+                        o.bounds.width * 1.3f, o.bounds.height * 1.3f,
                         1f, 1f,
                         o.getAngle(),
                         0, 0, obstacle2Texture.getWidth(), obstacle2Texture.getHeight(),
@@ -259,7 +259,7 @@ public class Main extends ApplicationAdapter {
                     batch.draw(obstacle3Texture,
                         o.bounds.x, o.bounds.y,
                         o.bounds.width / 2, o.bounds.height / 2,
-                        o.bounds.width, o.bounds.height,
+                        o.bounds.width * 1.3f, o.bounds.height * 1.3f,
                         1f, 1f,
                         o.getAngle(),
                         0, 0, obstacle3Texture.getWidth(), obstacle3Texture.getHeight(),
@@ -295,6 +295,9 @@ public class Main extends ApplicationAdapter {
         if (gameOver || dt <= 0) return;
 
         invincibleTime -= dt;
+
+        if (remainDash < stage)
+            remainDash += dt * 1f;
 
 
         mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
@@ -490,7 +493,7 @@ public class Main extends ApplicationAdapter {
     private void Land(){
         grounded = true;
         // 현재 스테이지에 따라 최대대쉬 수 다름
-        remainDash = stage;
+        //remainDash = stage;
         forceDir.x = 0f;
         forceDir.y = 0f;
     }
