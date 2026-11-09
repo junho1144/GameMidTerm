@@ -7,7 +7,7 @@ public class Obstacle {
     public final Rectangle bounds;
 
     private final Vector2 direction = new Vector2();   // 이동 방향 (길이 1)
-    private final float speed;
+    private float speed;
 
     public int type;
 
@@ -26,6 +26,10 @@ public class Obstacle {
     public void update(float dt) {
         bounds.x += direction.x * speed * dt;
         bounds.y += direction.y * speed * dt;
+
+        if (type == 1){
+            speed += 150f * dt;
+        }
     }
 
 

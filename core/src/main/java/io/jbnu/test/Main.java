@@ -133,18 +133,18 @@ public class Main extends ApplicationAdapter {
 
         switch (n) {
             case 1:
-                worldWidth = 2600;
-                blocks.add(new Rectangle(0, 0, 620, 60));
-                blocks.add(new Rectangle(760, 0, 540, 60));
-                blocks.add(new Rectangle(1440, 0, 1160, 60));
-                blocks.add(new Rectangle(300, 60, 80, 64));
-                blocks.add(new Rectangle(1080, 180, 160, 24));
+                worldWidth = 1000;
+                blocks.add(new Rectangle(-30, 0, 620, 60));
+                blocks.add(new Rectangle(760, 0, 600, 60));
+                //blocks.add(new Rectangle(1440, 0, 1160, 60));
+                //blocks.add(new Rectangle(300, 60, 80, 64));
+                //blocks.add(new Rectangle(1080, 180, 160, 24));
 
-                enemies.add(new Enemy(1, 300, 300, 80, 80, 2));
+                enemies.add(new Enemy(1, 300, 300, 120, 120, 2));
 
-                obstacles.add(new Obstacle(1, 100f, 100f, 60f, 10f, 1f, 1f, 20f));
-                obstacles.add(new Obstacle(2, 200f, 200f, 50f, 50f, 1f, 1f, 20f));
-                obstacles.add(new Obstacle(3, 300f, 300f, 50f, 50f, 1f, -1f, 20f));
+                //obstacles.add(new Obstacle(1, 100f, 100f, 60f, 10f, 1f, 1f, 20f));
+                //obstacles.add(new Obstacle(2, 200f, 200f, 50f, 50f, 1f, 1f, 20f));
+                //obstacles.add(new Obstacle(3, 300f, 300f, 50f, 50f, 1f, -1f, 20f));
                 break;
 
             case 2:
@@ -244,13 +244,13 @@ public class Main extends ApplicationAdapter {
 
             switch (e.type){
                 case 1:
-                    batch.draw(enemy1Texture, e.col.x, e.col.y, e.col.width, e.col.height);
+                    batch.draw(enemy1Texture, e.col.x, e.col.y, e.col.width * 1.3f, e.col.height * 1.3f);
                     break;
                 case 2:
-                    batch.draw(enemy2Texture, e.col.x, e.col.y, e.col.width, e.col.height);
+                    batch.draw(enemy2Texture, e.col.x, e.col.y, e.col.width * 1.3f, e.col.height * 1.3f);
                     break;
                 case 3:
-                    batch.draw(enemy3Texture, e.col.x, e.col.y, e.col.width, e.col.height);
+                    batch.draw(enemy3Texture, e.col.x, e.col.y, e.col.width * 1.3f, e.col.height * 1.3f);
                     break;
             }
 
@@ -409,9 +409,25 @@ public class Main extends ApplicationAdapter {
 
             e.hitTime -= dt;
 
+
+            // type 1: 5초마다 8방향으로 장애물 발사
+            if (e.type == 1 && e.hp > 0) {
+                e.shootTimer -= dt;
+                if (e.shootTimer <= 0f) {
+                    e.shootTimer = 5f;
+                    fireEightWay(e);
+                }
+            }
+
             // 이동
             switch (e.type){
                 case 1:
+                    e.col.x += 80f * dt * e.goRight;
+                    if (e.col.x < 300f) {
+                        e.goRight = 1;
+                    } else if (e.col.x > worldWidth - 300f) {
+                        e.goRight = -1;
+                    }
                     break;
                 case 2:
                     e.col.x += 100f * dt * e.goRight;
@@ -511,6 +527,22 @@ public class Main extends ApplicationAdapter {
             if (enemies.get(i).hp > 0) return false;
         }
         return true;
+    }
+    private void fireEightWay(Enemy e) {
+        float cx = e.col.x + e.col.width / 2;
+        float cy = e.col.y + e.col.height / 2;
+        float size = 30f;   // 장애물 크기
+
+        for (int i = 0; i < 8; i++) {
+            float angle = i * 45f;
+            float dirX = MathUtils.cosDeg(angle);
+            float dirY = MathUtils.sinDeg(angle);
+
+            // 적 중심에서 생성되도록 크기의 절반만큼 보정
+            obstacles.add(new Obstacle(1,
+                cx - size / 2, cy - size / 2, size * 1.5f, size * 0.15f,
+                dirX, dirY, 10f));
+        }
     }
 
     private void moveX(float dt) {
