@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.audio.Music;
 
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -90,6 +91,11 @@ public class Main extends ApplicationAdapter {
     private static final float GHOST_MIN_FORCE = 200f;   // 이 힘 이상일 때만 잔상 생성
 
 
+
+
+    private Music bgm;
+
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -112,6 +118,11 @@ public class Main extends ApplicationAdapter {
         camera.setToOrtho(false, 800, 600);
         viewport = new FitViewport(800, 600, camera);
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+
+        bgm = Gdx.audio.newMusic(Gdx.files.internal("NightmareKing.mp3"));
+        bgm.setLooping(true);
+        bgm.setVolume(0.5f);
+        bgm.play();
 
         loadStage(1);
     }
