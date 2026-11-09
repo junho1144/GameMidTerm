@@ -77,6 +77,18 @@ public class Main extends ApplicationAdapter {
     private final Array<Obstacle> obstacles = new Array<>();
 
 
+
+    private static class Ghost {
+        float x, y, life;
+        boolean flip; // 좌우반전
+    }
+    private final Array<Ghost> ghosts = new Array<>();
+    private float ghostTimer = 0f;
+    private static final float GHOST_INTERVAL = 0.03f;   // 잔상 생성 간격(초)
+    private static final float GHOST_LIFE = 0.25f;       // 잔상 유지 시간(초)
+    private static final float GHOST_MIN_FORCE = 200f;   // 이 힘 이상일 때만 잔상 생성
+
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -116,6 +128,8 @@ public class Main extends ApplicationAdapter {
         playerHP = 5;
         invincibleTime = 0;
         shakeTimer = 0;
+        ghosts.clear();
+        ghostTimer = 0f;
 
         switch (n) {
             case 1:
@@ -186,6 +200,20 @@ public class Main extends ApplicationAdapter {
         }
         //batch.draw(flagTexture, flag.x, flag.y, flag.width, flag.height);
 
+
+
+        // 잔상
+        for (int i = 0; i < ghosts.size; i++) {
+            Ghost g = ghosts.get(i);
+            float alpha = (g.life / GHOST_LIFE) * 0.5f;
+            batch.setColor(0.5f, 0.8f, 1f, alpha);
+            batch.draw(playerTexture,
+                g.x, g.y, player.width, player.height,
+                0, 0, playerTexture.getWidth(), playerTexture.getHeight(),
+                g.flip, false);
+        }
+        batch.setColor(1f, 1f, 1f, 1f);
+        // 플레이어
         if (invincibleTime <= 0 || ((int) (invincibleTime * 20) % 2 == 0)){
             batch.draw(playerTexture,
                 player.x, player.y, player.width, player.height,
@@ -352,6 +380,28 @@ public class Main extends ApplicationAdapter {
         moveX(dt);
         moveY(dt);
 
+        // 잔상 생성: 대쉬
+        if (forceDir.len() > GHOST_MIN_FORCE) {
+            ghostTimer -= dt;
+            if (ghostTimer <= 0f) {
+                Ghost g = new Ghost();
+                g.x = player.x;
+                g.y = player.y;
+                g.life = GHOST_LIFE;
+                g.flip = !facingLeft;
+                ghosts.add(g);
+                ghostTimer = GHOST_INTERVAL;
+            }
+        } else {
+            ghostTimer = 0f;
+        }
+        // 잔상 수명 감소
+        for (int i = ghosts.size - 1; i >= 0; i--) {
+            Ghost g = ghosts.get(i);
+            g.life -= dt;
+            if (g.life <= 0f) ghosts.removeIndex(i);
+        }
+
         // 적 충돌 처리
         // FIXME: 적-플레이어 충돌 처리만 있음
         for (int i = 0; i < enemies.size; i++){
@@ -421,7 +471,7 @@ public class Main extends ApplicationAdapter {
             }
 
             // 피해
-            if (invincibleTime > 0 || !player.overlaps(o.bounds)) continue;
+            if (invincibleTime > 0 || !player.overlaps(o.bounds) || forceDir.len() > 0.1f) continue;
             PlayerDealt();
             CameraShake(12f, 0.3f);
         }
