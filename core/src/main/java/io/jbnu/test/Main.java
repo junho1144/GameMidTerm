@@ -24,9 +24,10 @@ public class Main extends ApplicationAdapter {
     private static final float GRAVITY = 1700;
 
     private SpriteBatch batch;
-    private Texture playerTexture, blockTexture, flagTexture,backgroundTexture, energyBallTexture;
+    private Texture playerTexture, blockTexture, flagTexture, energyBallTexture;
     private Texture enemy1Texture, enemy2Texture, enemy3Texture;
     private Texture obstacle1Texture, obstacle2Texture, obstacle3Texture;
+    private Texture background1Texture, background2Texture, background3Texture;
     private Texture heartTexture;
     private OrthographicCamera camera;
     private FitViewport viewport;
@@ -93,9 +94,11 @@ public class Main extends ApplicationAdapter {
     public void create() {
         batch = new SpriteBatch();
         playerTexture = new Texture(Gdx.files.internal("KnightLeft.png"));
-        blockTexture = new Texture(Gdx.files.internal("block.png"));
+        blockTexture = new Texture(Gdx.files.internal("BlockTexture.png"));
         flagTexture = new Texture(Gdx.files.internal("flag.png"));
-        backgroundTexture = new Texture(Gdx.files.internal("Background1.jpg"));
+        background1Texture = new Texture(Gdx.files.internal("Background1.png"));
+        background2Texture = new Texture(Gdx.files.internal("Background2.png"));
+        background3Texture = new Texture(Gdx.files.internal("Background3.png"));
         energyBallTexture = new Texture(Gdx.files.internal("DashEnergyBall.png"));
         enemy1Texture = new Texture(Gdx.files.internal("Enemy1.png"));
         enemy2Texture = new Texture(Gdx.files.internal("Enemy2.png"));
@@ -163,10 +166,10 @@ public class Main extends ApplicationAdapter {
             case 3:
                 worldWidth = 1500;
                 blocks.add(new Rectangle(0, 0, 500, 60));
-                blocks.add(new Rectangle(650, 0, 400, 60));
+                blocks.add(new Rectangle(650, 0, 300, 60));
                 blocks.add(new Rectangle(1200, 0, 400, 60));
                 //blocks.add(new Rectangle(1750, 0, 1650, 60));
-                blocks.add(new Rectangle(900, 120, 120, 60));
+                //blocks.add(new Rectangle(900, 120, 120, 60));
                 //blocks.add(new Rectangle(2300, 60, 150, 150));
 
                 enemies.add(new Enemy(3, 300, 300, 120, 120, 2));
@@ -191,10 +194,18 @@ public class Main extends ApplicationAdapter {
         batch.begin();
 
         // BG
+        // BG
+        Texture bg;
+        switch (stage) {
+            case 2:  bg = background2Texture; break;
+            case 3:  bg = background3Texture; break;
+            default: bg = background1Texture; break;
+        }
+
         float screenLeft = camera.position.x - 400;
         float bgX = screenLeft * (1 - BG_SPEED);
         float bgWidth = 800 + (worldWidth - 800) * BG_SPEED;
-        batch.draw(backgroundTexture, bgX, 0, bgWidth, 600);
+        batch.draw(bg, bgX, 0, bgWidth, 600);
 
         for (Rectangle block : blocks) {
             batch.draw(blockTexture, block.x, block.y, block.width, block.height);
@@ -656,5 +667,8 @@ public class Main extends ApplicationAdapter {
         playerTexture.dispose();
         blockTexture.dispose();
         flagTexture.dispose();
+        background1Texture.dispose();
+        background2Texture.dispose();
+        background3Texture.dispose();
     }
 }
