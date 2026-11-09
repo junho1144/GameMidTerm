@@ -194,7 +194,8 @@ public class Main extends ApplicationAdapter {
 
         // 큰 프레임 시간으로 인해 한 번에 너무 멀리 이동하는 것을 제한합니다.
         float dt = Math.min(Gdx.graphics.getDeltaTime(), 1f / 30f);
-        update(dt);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) paused = !paused;
+        if (!paused) update(dt);
 
 
 
@@ -333,6 +334,7 @@ public class Main extends ApplicationAdapter {
 
 
 
+    private boolean paused = false;
     private void update(float dt) {
         if (gameOver || dt <= 0) return;
 
