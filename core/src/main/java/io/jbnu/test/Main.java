@@ -96,6 +96,10 @@ public class Main extends ApplicationAdapter {
     private Music bgm;
 
 
+    private Texture clearTexture;
+    private boolean cleared = false;
+
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -113,6 +117,7 @@ public class Main extends ApplicationAdapter {
         obstacle1Texture = new Texture(Gdx.files.internal("Obstacle1.png"));
         obstacle2Texture = new Texture(Gdx.files.internal("obstacle2.png"));
         obstacle3Texture = new Texture(Gdx.files.internal("obstacle3.png"));
+        clearTexture = new Texture(Gdx.files.internal("ClearScene.png"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
@@ -334,6 +339,10 @@ public class Main extends ApplicationAdapter {
         }
 
 
+        if (cleared) {
+            batch.draw(clearTexture, camera.position.x - 400, 0, 800, 600);
+        }
+
         batch.end();
 
     }
@@ -343,6 +352,13 @@ public class Main extends ApplicationAdapter {
     private boolean paused = false;
     private float hitStopTimer = 0f;
     private void update(float dt) {
+        if (cleared) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+                cleared = false;
+                loadStage(1);
+            }
+            return;
+        }
         if (gameOver || dt <= 0) return;
 
         invincibleTime -= dt;
@@ -563,7 +579,11 @@ public class Main extends ApplicationAdapter {
         camera.update();
 
         if (allEnemiesDead()) {
-            loadStage(stage % MAX_STAGE + 1);
+            if (stage >= MAX_STAGE) {
+                cleared = true;
+            } else {
+                loadStage(stage + 1);
+            }
             return;
         }
     }
