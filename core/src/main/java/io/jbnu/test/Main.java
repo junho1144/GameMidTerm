@@ -355,7 +355,7 @@ public class Main extends ApplicationAdapter {
         viewport.unproject(mouse);
 
         // 마우스 클릭 - 그 방향으로 힘 대쉬함
-        if (Gdx.input.justTouched() && remainDash > 0) {
+        if (Gdx.input.justTouched() && remainDash >= 1f) {
             forceDir.set(mouse.x - player.x, mouse.y - player.y);
 
             forceDir.nor().scl(1000); // 일반화후 힘만큼
@@ -501,8 +501,11 @@ public class Main extends ApplicationAdapter {
                 if (forceDir.len() > 0.1f && e.hitTime <= 0f){
                     EnemyDealt(e);
                     // 튕김
-                    forceDir.x = e2pVec.x * 900;
-                    forceDir.y = -1 * 900;
+                    //forceDir.x = e2pVec.x * 900;
+                    //forceDir.y = -1 * 900;
+                    forceDir.x = 0;
+                    forceDir.y = 0;
+                    invincibleTime = 0.5f;
 
                     CameraShake(10, 0.15f);
                 }
