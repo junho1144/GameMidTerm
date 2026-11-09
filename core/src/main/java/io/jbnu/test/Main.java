@@ -496,7 +496,7 @@ public class Main extends ApplicationAdapter {
                     CameraShake(10, 0.15f);
                 }
                 else if (invincibleTime <= 0f) {
-                    PlayerDealt();
+                    if (PlayerDealt()) return;
                     // 살짝 튕김
                     forceDir.x = e2pVec.x * 600;
                     forceDir.y = e2pVec.y * 600;
@@ -519,13 +519,13 @@ public class Main extends ApplicationAdapter {
 
             // 피해
             if (invincibleTime > 0 || !player.overlaps(o.bounds) || forceDir.len() > 0.1f) continue;
-            PlayerDealt();
+            if (PlayerDealt()) return;
             CameraShake(12f, 0.3f);
         }
 
         // 4. 낭떠러지에 떨어지면 시작점으로 복귀합니다.
         if (player.y < -100) {
-            PlayerDealt();
+            if (PlayerDealt()) return;
             player.setPosition(80, 60);
             velocityY = 0;
             grounded = false;
@@ -640,15 +640,15 @@ public class Main extends ApplicationAdapter {
         forceDir.y = 0f;
     }
 
-    private void PlayerDealt(){
+    private boolean PlayerDealt() {
         playerHP--;
-        if (playerHP <= 0){
+        if (playerHP <= 0) {
             loadStage(stage);
-            return;
+            return true;   // 사망 → 스테이지 재시작됨
         }
-
         invincibleTime = 1.0f;
         CameraShake(10, 0.15f);
+        return false;
     }
     private void EnemyDealt(Enemy e){
         e.hp--;
