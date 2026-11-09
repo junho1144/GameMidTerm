@@ -155,7 +155,7 @@ public class Main extends ApplicationAdapter {
                 //blocks.add(new Rectangle(300, 60, 80, 64));
                 //blocks.add(new Rectangle(1080, 180, 160, 24));
 
-                enemies.add(new Enemy(1, 300, 300, 120, 120, 2));
+                enemies.add(new Enemy(1, 300, 200, 90, 140, 4));
 
                 //obstacles.add(new Obstacle(1, 100f, 100f, 60f, 10f, 1f, 1f, 20f));
                 //obstacles.add(new Obstacle(2, 200f, 200f, 50f, 50f, 1f, 1f, 20f));
@@ -167,23 +167,23 @@ public class Main extends ApplicationAdapter {
                 blocks.add(new Rectangle(0, 0, 500, 60));
                 blocks.add(new Rectangle(1000, 0, 200, 60));
                 //blocks.add(new Rectangle(1800, 0, 1200, 60));
-                blocks.add(new Rectangle(700, 30, 100, 100));
+                blocks.add(new Rectangle(700, 30, 250, 100));
                 //blocks.add(new Rectangle(1300, 30, 100, 100));
                 //blocks.add(new Rectangle(2200, 60, 120, 120));
 
-                enemies.add(new Enemy(2, 300, 310, 130, 130, 2));
+                enemies.add(new Enemy(2, 300, 310, 150, 150, 5));
                 break;
 
             case 3:
                 worldWidth = 1500;
                 blocks.add(new Rectangle(0, 0, 500, 60));
-                blocks.add(new Rectangle(650, 0, 300, 60));
+                blocks.add(new Rectangle(650, 0, 300, 120));
                 blocks.add(new Rectangle(1200, 0, 400, 60));
                 //blocks.add(new Rectangle(1750, 0, 1650, 60));
                 //blocks.add(new Rectangle(900, 120, 120, 60));
                 //blocks.add(new Rectangle(2300, 60, 150, 150));
 
-                enemies.add(new Enemy(3, 300, 300, 120, 120, 2));
+                enemies.add(new Enemy(3, 300, 300, 140, 140, 7));
                 break;
         }
     }
@@ -265,18 +265,22 @@ public class Main extends ApplicationAdapter {
                 batch.setColor(1f, 1f, 1f, 1f);
             }
 
-            switch (e.type){
-                case 1:
-                    batch.draw(enemy1Texture, e.col.x, e.col.y, e.col.width * 1.3f, e.col.height * 1.3f);
-                    break;
-                case 2:
-                    batch.draw(enemy2Texture, e.col.x, e.col.y, e.col.width * 1.3f, e.col.height * 1.3f);
-                    break;
-                case 3:
-                    batch.draw(enemy3Texture, e.col.x, e.col.y, e.col.width * 1.3f, e.col.height * 1.3f);
-                    break;
+            // 타입별 텍스처와 배율 (가로, 세로)
+            Texture tex;
+            float scaleX, scaleY;
+            switch (e.type) {
+                case 1:  tex = enemy1Texture; scaleX = 2.0f; scaleY = 1.2f; break;
+                case 2:  tex = enemy2Texture; scaleX = 1.5f; scaleY = 1.5f; break;
+                default: tex = enemy3Texture; scaleX = 1.7f; scaleY = 1.7f; break;
             }
 
+            // 그림 크기를 정하고, 판정 박스(col) 중심에 맞춰 배치
+            float w = e.col.width * scaleX;
+            float h = e.col.height * scaleY;
+            float dx = e.col.x + e.col.width / 2 - w / 2;
+            float dy = e.col.y + e.col.height / 2 - h / 2;
+
+            batch.draw(tex, dx, dy, w, h);
         }
         batch.setColor(1f, 1f, 1f, 1f);
 
@@ -285,42 +289,29 @@ public class Main extends ApplicationAdapter {
         for (int i = 0; i < obstacles.size; i++) {
             Obstacle o = obstacles.get(i);
 
-            switch (o.type){
-                case 1:
-                    batch.draw(obstacle1Texture,
-                        o.bounds.x, o.bounds.y,
-                        o.bounds.width / 2, o.bounds.height / 2,
-                        o.bounds.width * 1.8f, o.bounds.height * 2,
-                        1f, 1f,
-                        o.getAngle(),
-                        0, 0, obstacle1Texture.getWidth(), obstacle1Texture.getHeight(),
-                        false, false);
-                    break;
-                case 2:
-                    batch.draw(obstacle2Texture,
-                        o.bounds.x, o.bounds.y,
-                        o.bounds.width / 2, o.bounds.height / 2,
-                        o.bounds.width * 1.3f, o.bounds.height * 1.3f,
-                        1f, 1f,
-                        o.getAngle(),
-                        0, 0, obstacle2Texture.getWidth(), obstacle2Texture.getHeight(),
-                        false, false);
-                    break;
-                case 3:
-                    batch.draw(obstacle3Texture,
-                        o.bounds.x, o.bounds.y,
-                        o.bounds.width / 2, o.bounds.height / 2,
-                        o.bounds.width * 1.3f, o.bounds.height * 1.3f,
-                        1f, 1f,
-                        o.getAngle(),
-                        0, 0, obstacle3Texture.getWidth(), obstacle3Texture.getHeight(),
-                        false, false);
-                    break;
-
+            // 타입별 텍스처와 배율 (가로, 세로)
+            Texture tex;
+            float scaleX, scaleY;
+            switch (o.type) {
+                case 1:  tex = obstacle1Texture; scaleX = 1.8f; scaleY = 2.0f; break;
+                case 2:  tex = obstacle2Texture; scaleX = 1.4f; scaleY = 1.4f; break;
+                default: tex = obstacle3Texture; scaleX = 1.4f; scaleY = 1.4f; break;
             }
 
+            // 그림 크기를 정하고, 판정 박스(bounds) 중심에 맞춰 배치
+            float w = o.bounds.width * scaleX;
+            float h = o.bounds.height * scaleY;
+            float dx = o.bounds.x + o.bounds.width / 2 - w / 2;
+            float dy = o.bounds.y + o.bounds.height / 2 - h / 2;
 
-
+            batch.draw(tex,
+                dx, dy,
+                w / 2, h / 2,          // 회전 중심 = 그림 중심 (= bounds 중심)
+                w, h,
+                1f, 1f,
+                o.getAngle(),
+                0, 0, tex.getWidth(), tex.getHeight(),
+                false, false);
         }
 
 
@@ -663,7 +654,7 @@ public class Main extends ApplicationAdapter {
     }
     private void EnemyDealt(Enemy e){
         e.hp--;
-        e.hitTime = 0.3f;
+        e.hitTime = 0.5f;
     }
 
 
