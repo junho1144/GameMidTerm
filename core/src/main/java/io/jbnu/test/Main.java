@@ -130,12 +130,13 @@ public class Main extends ApplicationAdapter {
         shakeTimer = 0;
         ghosts.clear();
         ghostTimer = 0f;
+        remainDash = 0f;
 
         switch (n) {
             case 1:
                 worldWidth = 1000;
                 blocks.add(new Rectangle(-30, 0, 620, 60));
-                blocks.add(new Rectangle(760, 0, 600, 60));
+                blocks.add(new Rectangle(760, 0, 800, 60));
                 //blocks.add(new Rectangle(1440, 0, 1160, 60));
                 //blocks.add(new Rectangle(300, 60, 80, 64));
                 //blocks.add(new Rectangle(1080, 180, 160, 24));
@@ -160,15 +161,15 @@ public class Main extends ApplicationAdapter {
                 break;
 
             case 3:
-                worldWidth = 3400;
+                worldWidth = 1500;
                 blocks.add(new Rectangle(0, 0, 500, 60));
                 blocks.add(new Rectangle(650, 0, 400, 60));
                 blocks.add(new Rectangle(1200, 0, 400, 60));
-                blocks.add(new Rectangle(1750, 0, 1650, 60));
-                blocks.add(new Rectangle(900, 120, 120, 24));
-                blocks.add(new Rectangle(2300, 60, 150, 150));
+                //blocks.add(new Rectangle(1750, 0, 1650, 60));
+                blocks.add(new Rectangle(900, 120, 120, 60));
+                //blocks.add(new Rectangle(2300, 60, 150, 150));
 
-                enemies.add(new Enemy(3, 300, 300, 80, 80, 2));
+                enemies.add(new Enemy(3, 300, 300, 120, 120, 2));
                 break;
         }
     }
@@ -411,7 +412,7 @@ public class Main extends ApplicationAdapter {
 
 
             // type 1: 5초마다 8방향으로 장애물 발사
-            if ((e.type == 1 || e.type == 2) && e.hp > 0) {
+            if ((e.type == 1 || e.type == 2 || e.type == 3) && e.hp > 0) {
                 e.shootTimer -= dt;
                 if (e.shootTimer <= 0f) {
                     e.shootTimer = 5f;
@@ -419,11 +420,19 @@ public class Main extends ApplicationAdapter {
                 }
             }
             // type 2: 4초마다 유도 장애물 1개 발사
-            if (e.type == 2 && e.hp > 0) {
+            if ((e.type == 2 || e.type == 3) && e.hp > 0) {
                 e.shootTimer2 -= dt;
                 if (e.shootTimer2 <= 0f) {
                     e.shootTimer2 = 4f;
                     fireHoming(e);
+                }
+            }
+            // type 3: 6초마다 3방향 나선 장애물 발사
+            if (e.type == 3 && e.hp > 0) {
+                e.shootTimer3 -= dt;
+                if (e.shootTimer3 <= 0f) {
+                    e.shootTimer3 = 6f;
+                    fireSpiral(e);
                 }
             }
 
@@ -446,16 +455,16 @@ public class Main extends ApplicationAdapter {
                     }
                     break;
                 case 3:
-                    e.col.x += 120f * dt * e.goRight;
+                    e.col.x += 140f * dt * e.goRight;
                     if (e.col.x < 300f) {
                         e.goRight = 1;
                     } else if (e.col.x > worldWidth - 300f) {
                         e.goRight = -1;
                     }
-                    e.col.y += 80f * dt * e.goUp;
-                    if (e.col.y < 100f) {
+                    e.col.y += 60f * dt * e.goUp;
+                    if (e.col.y < 150f) {
                         e.goUp = 1;
-                    } else if (e.col.y > 500f) {
+                    } else if (e.col.y > 400f) {
                         e.goUp = -1;
                     }
                     break;
@@ -471,7 +480,7 @@ public class Main extends ApplicationAdapter {
                     EnemyDealt(e);
                     // 튕김
                     forceDir.x = e2pVec.x * 900;
-                    forceDir.y = e2pVec.y * 900;
+                    forceDir.y = -1 * 900;
 
                     CameraShake(10, 0.15f);
                 }
@@ -492,7 +501,7 @@ public class Main extends ApplicationAdapter {
                 o.steerToward(player.x + player.width / 2, player.y + player.height / 2, dt);
             }
             o.update(dt);
-            if (o.isOutOfWorld(worldWidth)) {
+            if (o.isOutOfWorld(worldWidth) || o.isExpired()) {
                 obstacles.removeIndex(i);
                 continue;
             }
@@ -569,6 +578,20 @@ public class Main extends ApplicationAdapter {
         o.homing = true;
         o.turnRate = 45f;
         obstacles.add(o);
+    }
+    private void fireSpiral(Enemy e) {
+        float cx = e.col.x + e.col.width / 2;
+        float cy = e.col.y + e.col.height / 2;
+        float size = 30f;
+
+        for (int i = 0; i < 3; i++) {
+            float angle = 90f + i * 120f;   // 위, 왼쪽 아래, 오른쪽 아래 (120도 간격)
+
+            Obstacle o = new Obstacle(3, cx - size / 2, cy - size / 2, size, size,
+                1f, 0f, 0f);            // 방향/속도는 나선이 덮어씀
+            o.setSpiral(cx, cy, angle);
+            obstacles.add(o);
+        }
     }
 
     private void moveX(float dt) {

@@ -28,6 +28,24 @@ public class Obstacle {
     }
 
     public void update(float dt) {
+
+        life -= dt;
+        if (spiral) {
+            spiralAngle -= angularSpeed * dt;     // 시계방향 = 각도 감소
+            spiralRadius += radialSpeed * dt;     // 점점 퍼짐
+
+            float px = originX + MathUtils.cosDeg(spiralAngle) * spiralRadius;
+            float py = originY + MathUtils.sinDeg(spiralAngle) * spiralRadius;
+
+            // 진행 방향(이미지 회전용): 이전 위치 → 새 위치
+            float cx = bounds.x + bounds.width / 2;
+            float cy = bounds.y + bounds.height / 2;
+            if (px != cx || py != cy) direction.set(px - cx, py - cy).nor();
+
+            bounds.setCenter(px, py);
+            return;
+        }
+
         bounds.x += direction.x * speed * dt;
         bounds.y += direction.y * speed * dt;
 
@@ -37,8 +55,13 @@ public class Obstacle {
         if (type == 2){
             speed += 100f * dt;
         }
+        if (type == 3){
+            speed += 100f * dt;
+        }
     }
-
+    public boolean isExpired() {
+        return life <= 0f;
+    }
 
     public float getAngle() {
         return direction.angleDeg();
@@ -65,4 +88,25 @@ public class Obstacle {
 
         direction.rotateDeg(turn);
     }
+
+
+
+    public boolean spiral = false;
+    private float originX, originY;     // 출발점 (중심)
+    private float spiralAngle;          // 현재 각도(도)
+    private float spiralRadius = 0f;    // 현재 반지름
+    public float angularSpeed = 120f;   // 초당 회전각(도), 시계방향이라 각도가 감소
+    public float radialSpeed = 100f;     // 초당 반지름 증가량
+    /** (cx, cy)를 출발점으로, startAngle 방향에서 시작하는 시계방향 나선으로 설정 */
+    public void setSpiral(float cx, float cy, float startAngle) {
+        spiral = true;
+        originX = cx;
+        originY = cy;
+        spiralAngle = startAngle;
+        spiralRadius = 0f;
+    }
+
+
+    private static final float LIFE_TIME = 5f;   // 모든 장애물의 수명(초)
+    private float life = LIFE_TIME;
 }

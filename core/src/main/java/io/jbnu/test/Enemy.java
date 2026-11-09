@@ -24,8 +24,9 @@ public class Enemy {
     public int goUp = 1;
 
 
-    public float shootTimer = 5f;
-    public float shootTimer2 = 4f;
+    public float shootTimer = 2.5f;
+    public float shootTimer2 = 2f;
+    public float shootTimer3 = 3f;
 
 
 
