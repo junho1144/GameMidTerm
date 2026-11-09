@@ -148,15 +148,15 @@ public class Main extends ApplicationAdapter {
                 break;
 
             case 2:
-                worldWidth = 3000;
-                blocks.add(new Rectangle(0, 0, 800, 60));
-                blocks.add(new Rectangle(950, 0, 700, 60));
-                blocks.add(new Rectangle(1800, 0, 1200, 60));
-                blocks.add(new Rectangle(500, 60, 100, 100));
-                blocks.add(new Rectangle(1200, 150, 200, 24));
-                blocks.add(new Rectangle(2200, 60, 120, 120));
+                worldWidth = 1200;
+                blocks.add(new Rectangle(0, 0, 500, 60));
+                blocks.add(new Rectangle(1000, 0, 200, 60));
+                //blocks.add(new Rectangle(1800, 0, 1200, 60));
+                blocks.add(new Rectangle(700, 30, 100, 100));
+                //blocks.add(new Rectangle(1300, 30, 100, 100));
+                //blocks.add(new Rectangle(2200, 60, 120, 120));
 
-                enemies.add(new Enemy(2, 300, 300, 80, 80, 2));
+                enemies.add(new Enemy(2, 300, 310, 130, 130, 2));
                 break;
 
             case 3:
@@ -411,11 +411,19 @@ public class Main extends ApplicationAdapter {
 
 
             // type 1: 5초마다 8방향으로 장애물 발사
-            if (e.type == 1 && e.hp > 0) {
+            if ((e.type == 1 || e.type == 2) && e.hp > 0) {
                 e.shootTimer -= dt;
                 if (e.shootTimer <= 0f) {
                     e.shootTimer = 5f;
                     fireEightWay(e);
+                }
+            }
+            // type 2: 4초마다 유도 장애물 1개 발사
+            if (e.type == 2 && e.hp > 0) {
+                e.shootTimer2 -= dt;
+                if (e.shootTimer2 <= 0f) {
+                    e.shootTimer2 = 4f;
+                    fireHoming(e);
                 }
             }
 
@@ -480,6 +488,9 @@ public class Main extends ApplicationAdapter {
         // 장애물
         for (int i = obstacles.size - 1; i >= 0; i--) {
             Obstacle o = obstacles.get(i);
+            if (o.homing) {
+                o.steerToward(player.x + player.width / 2, player.y + player.height / 2, dt);
+            }
             o.update(dt);
             if (o.isOutOfWorld(worldWidth)) {
                 obstacles.removeIndex(i);
@@ -543,6 +554,21 @@ public class Main extends ApplicationAdapter {
                 cx - size / 2, cy - size / 2, size * 1.5f, size * 0.15f,
                 dirX, dirY, 10f));
         }
+    }
+    private void fireHoming(Enemy e) {
+        float cx = e.col.x + e.col.width / 2;
+        float cy = e.col.y + e.col.height / 2;
+        float size = 30f;
+
+        // 처음 방향은 발사 시점의 플레이어 쪽
+        float dirX = player.x - cx;
+        float dirY = player.y - cy;
+
+        Obstacle o = new Obstacle(2, cx - size / 2, cy - size / 2, size, size,
+            dirX, dirY, 160f);
+        o.homing = true;
+        o.turnRate = 45f;
+        obstacles.add(o);
     }
 
     private void moveX(float dt) {

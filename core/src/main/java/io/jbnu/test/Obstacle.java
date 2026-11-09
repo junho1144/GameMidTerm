@@ -2,6 +2,7 @@ package io.jbnu.test;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.MathUtils;
 
 public class Obstacle {
     public final Rectangle bounds;
@@ -10,6 +11,9 @@ public class Obstacle {
     private float speed;
 
     public int type;
+
+    public boolean homing = false;
+    public float turnRate = 75f;
 
 
 
@@ -30,6 +34,9 @@ public class Obstacle {
         if (type == 1){
             speed += 150f * dt;
         }
+        if (type == 2){
+            speed += 100f * dt;
+        }
     }
 
 
@@ -40,5 +47,22 @@ public class Obstacle {
     public boolean isOutOfWorld(float worldWidth) {
         return bounds.x + bounds.width < -200 || bounds.x > worldWidth + 200
             || bounds.y + bounds.height < -200 || bounds.y > 1000;
+    }
+
+
+    public void steerToward(float targetX, float targetY, float dt) {
+        float cx = bounds.x + bounds.width / 2;
+        float cy = bounds.y + bounds.height / 2;
+
+        float targetAngle = MathUtils.atan2(targetY - cy, targetX - cx) * MathUtils.radiansToDegrees;
+        float currentAngle = direction.angleDeg();
+
+        // 현재 → 목표 각도 차이를 -180 ~ 180 범위로 변환 (가까운 쪽으로 회전)
+        float diff = ((targetAngle - currentAngle + 540f) % 360f) - 180f;
+
+        float maxTurn = turnRate * dt;
+        float turn = MathUtils.clamp(diff, -maxTurn, maxTurn);
+
+        direction.rotateDeg(turn);
     }
 }
