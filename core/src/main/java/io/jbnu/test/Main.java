@@ -195,7 +195,13 @@ public class Main extends ApplicationAdapter {
         // 큰 프레임 시간으로 인해 한 번에 너무 멀리 이동하는 것을 제한합니다.
         float dt = Math.min(Gdx.graphics.getDeltaTime(), 1f / 30f);
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) paused = !paused;
-        if (!paused) update(dt);
+        if (!paused) {
+            if (hitStopTimer > 0f) {
+                hitStopTimer -= dt;
+            } else {
+                update(dt);
+            }
+        }
 
 
 
@@ -335,6 +341,7 @@ public class Main extends ApplicationAdapter {
 
 
     private boolean paused = false;
+    private float hitStopTimer = 0f;
     private void update(float dt) {
         if (gameOver || dt <= 0) return;
 
@@ -648,14 +655,16 @@ public class Main extends ApplicationAdapter {
         playerHP--;
         if (playerHP <= 0) {
             loadStage(stage);
-            return true;   // 사망 → 스테이지 재시작됨
+            return true;
         }
         invincibleTime = 1.0f;
+        hitStopTimer = 0.04f;
         CameraShake(10, 0.15f);
         return false;
     }
     private void EnemyDealt(Enemy e){
         e.hp--;
+        hitStopTimer = 0.04f;
         e.hitTime = 0.5f;
     }
 
